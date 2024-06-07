@@ -1,9 +1,7 @@
 local userInputService = game:GetService("UserInputService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
-local player = game.Players.LocalPlayer  -- Assuming this script is running on the client side
+local player = game.Players.LocalPlayer
 
-local interval = 0.1
-local isFiring = false
 local foods = {210, 210}  -- Add more food IDs here
 local delayBetweenFoods = 0.5  -- Delay between each food item
 
@@ -11,29 +9,16 @@ local function fireEvent(foodID)
     replicatedStorage:WaitForChild("remoteInterface"):WaitForChild("interactions"):WaitForChild("eat"):FireServer(foodID)
 end
 
-local function onTap()
-    isFiring = not isFiring
-    if isFiring then
-        while isFiring and player.Character and player.Character:FindFirstChild("Humanoid") do
-            if player.Character.Humanoid.Health < player.Character.Humanoid.MaxHealth then
+userInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            local humanoid = player.Character.Humanoid
+            if humanoid.Health < humanoid.MaxHealth then
                 for _, foodID in ipairs(foods) do
                     fireEvent(foodID)
                     wait(delayBetweenFoods)
                 end
             end
-            wait(interval)
         end
-    end
-end
-
-userInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        onTap()
-    end
-end)
-
-userInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        isFiring = false
     end
 end)
